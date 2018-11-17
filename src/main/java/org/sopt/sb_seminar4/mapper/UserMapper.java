@@ -2,6 +2,7 @@ package org.sopt.sb_seminar4.mapper;
 
 import org.apache.ibatis.annotations.*;
 import org.sopt.sb_seminar4.dto.User;
+import org.sopt.sb_seminar4.model.SignUpReq;
 
 import java.util.List;
 
@@ -26,11 +27,15 @@ public interface UserMapper {
     @Select("SELECT * FROM user WHERE userIdx = #{userIdx}")
     User findByUserIdx(@Param("userIdx") final int userIdx);
 
+    // 회원 이름과 비밀번호로 조회
+    @Select("SELECT * FROM user WHERE name = #{name} AND password = #{passowrd}")
+    User findByNameAndPassword(@Param("name") final String name, @Param("password") final String password);
+
     // 회원 등록, Auto Increment는 회원 고유 번호
     // Auto Increment 값을 받아오고 싶으면 리턴 타입을 int(Auto Increment 컬럼 타입)으로 하면 된다.
-    @Insert("INSERT INTO user(name, part) VALUES(#{user.name}, #{user.part})")
+    @Insert("INSERT INTO user(name, part, profileUrl) VALUES(#{signUpReq.name}, #{signUpReq.part}, #{signUpReq.profileUrl})")
     @Options(useGeneratedKeys = true, keyColumn = "user.userIdx")
-    int save(@Param("user") final User user);
+    int save(@Param("signUpReq") final SignUpReq signUpReq);
 
     // Auto Increment 값을 받아오고 싶지 않다면 필요 없다.
     @Insert("INSERT INTO user(name, part) VALUES(#{user.name}, #{user.part})")
