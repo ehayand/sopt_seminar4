@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.sopt.sb_seminar4.dto.User;
 import org.sopt.sb_seminar4.mapper.UserMapper;
 import org.sopt.sb_seminar4.model.DefaultRes;
+import org.sopt.sb_seminar4.model.SignUpReq;
 import org.sopt.sb_seminar4.utils.ResponseMessage;
 import org.sopt.sb_seminar4.utils.StatusCode;
 import org.springframework.stereotype.Service;
@@ -23,14 +24,19 @@ import java.util.List;
 public class UserService {
 
     private final UserMapper userMapper;
+    private final FileUploadService fileUploadService;
 
     /**
      * UserMapper 생성자 의존성 주입
+     * FileUploadService 생성자 의존성 주입
      *
      * @param userMapper
+     * @param fileUploadService
      */
-    public UserService(final UserMapper userMapper) {
+
+    public UserService(UserMapper userMapper, FileUploadService fileUploadService) {
         this.userMapper = userMapper;
+        this.fileUploadService = fileUploadService;
     }
 
     /**
@@ -61,13 +67,16 @@ public class UserService {
     /**
      * 회원 가입
      *
-     * @param user 회원 데이터
+     * @param signUpReq 회원 데이터
      * @return DefaultRes
      */
     @Transactional
-    public DefaultRes save(final User user) {
+    public DefaultRes save(SignUpReq signUpReq) {
         try {
-            userMapper.save(user);
+            if (signUpReq.getProfile() != null)
+                signUpReq.setProfileUrl(fileUploadService.upload(signUpReq.getProfile()));
+
+            userMapper.save(signUpReq);
             return DefaultRes.res(StatusCode.CREATED, ResponseMessage.CREATED_USER);
         } catch (Exception e) {
             //Rollback
